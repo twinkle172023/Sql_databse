@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Documents - Document Vault</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <header class="header">
+        <div class="container nav-container">
+            <div class="brand">
+                <span class="brand-badge">SQL</span>
+                <h2>Document Vault - Compiler Lab</h2>
+            </div>
+            <nav class="nav-links">
+                <a href="/" class="nav-link">Home</a>
+                <a href="/upload" class="nav-link active">Upload Documents</a>
+                <a href="/documents" class="nav-link">Documents</a>
+                <a href="/sql-lab" class="nav-link">SQL Injection Lab</a>
+                <a href="/compiler-demo" class="nav-link">Compiler Demo</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container main-content">
+        <div class="card">
+            <h2>Upload Document</h2>
+            <p class="card-desc">
+                Supported formats: PDF, DOC, DOCX, PPT, PPTX, TXT, JPG, JPEG, PNG.
+            </p>
+
+            {% if message %}
+                <div class="alert {{ 'alert-success' if status == 'success' else 'alert-error' }}">
+                    {{ message }}
+                </div>
+            {% endif %}
+
+            <form action="/upload" method="POST" enctype="multipart/form-data" class="upload-form">
+                <div class="form-group">
+                    <label for="file">Select File:</label>
+                    <input type="file" id="file" name="file" required accept=".pdf,.doc,.docx,.ppt,.pptx,.txt,.jpg,.jpeg,.png" class="file-input">
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Upload Document</button>
+                    <a href="/documents" class="btn btn-secondary">View Documents Table</a>
+                </div>
+            </form>
+
+            <div class="info-box mt-4">
+                <h4>Safety & Non-Execution Policy</h4>
+                <p>
+                    Uploaded files are stored as inert data with a randomized UUID prefix in the <code>uploads/</code> folder. 
+                    The application <strong>never executes uploaded files</strong> or constructs shell/Python/OS commands from uploaded content.
+                </p>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container footer-content">
+            <span>Document Vault - SQL Injection Compiler Lab</span>
+            <span>Local Educational Lab · SQLite</span>
+        </div>
+    </footer>
+</body>
+</html>

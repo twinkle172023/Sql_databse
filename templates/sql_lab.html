@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SQL Injection Lab - Compiler Testing</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <header class="header">
+        <div class="container nav-container">
+            <div class="brand">
+                <span class="brand-badge">SQL</span>
+                <h2>Document Vault - Compiler Lab</h2>
+            </div>
+            <nav class="nav-links">
+                <a href="/" class="nav-link">Home</a>
+                <a href="/upload" class="nav-link">Upload Documents</a>
+                <a href="/documents" class="nav-link">Documents</a>
+                <a href="/sql-lab" class="nav-link active">SQL Injection Lab</a>
+                <a href="/compiler-demo" class="nav-link">Compiler Demo</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container main-content">
+        <!-- Educational Warning Callout -->
+        <div class="alert alert-warning">
+            <strong>INTENTIONALLY VULNERABLE — EDUCATIONAL SQL INJECTION LAB</strong><br>
+            This laboratory demonstrates vulnerable string interpolation vs secure parameterization using fake local credentials in <code>database.db</code>. Run only locally.
+        </div>
+
+        <!-- Query Workbench Card -->
+        <div class="card mt-3">
+            <h2>SQL Query Generator & Test Workbench</h2>
+            <p class="card-desc">
+                Enter a username or test payload below to see how the SQL statement is generated and executed.
+            </p>
+
+            <div class="form-group">
+                <label for="username-input"><strong>Username / SQL Payload Input:</strong></label>
+                <div class="input-action-row">
+                    <input type="text" id="username-input" class="text-input font-mono" value="' OR '1'='1" placeholder="Enter username or payload...">
+                    <button id="btn-vuln" class="btn btn-danger">Run Vulnerable Query</button>
+                    <button id="btn-secure" class="btn btn-success">Run Secure Query</button>
+                </div>
+            </div>
+
+            <!-- Quick Payload Buttons for Compiler Testing -->
+            <div class="preset-row">
+                <span class="text-muted text-sm font-semibold">Compiler Test Presets:</span>
+                <button type="button" class="btn-preset" data-val="' OR '1'='1">' OR '1'='1 (Tautology Bypass)</button>
+                <button type="button" class="btn-preset" data-val="alice">alice (Normal Literal)</button>
+                <button type="button" class="btn-preset" data-val="' UNION SELECT id, username, password FROM users --">' UNION SELECT users -- (Union Exfiltration)</button>
+                <button type="button" class="btn-preset" data-val="admin' --">admin' -- (Comment Out Password)</button>
+                <button type="button" class="btn-preset" data-val="'">' (Single Quote Syntax Error)</button>
+            </div>
+        </div>
+
+        <!-- Generated SQL & Compiler Export Area -->
+        <div class="card mt-4">
+            <div class="card-header-flex">
+                <div>
+                    <h3>Generated SQL Statement (Compiler Input)</h3>
+                    <p class="card-desc">Export or copy this SQL query into your Compiler Design project.</p>
+                </div>
+                <div class="export-actions">
+                    <button id="btn-copy" class="btn btn-secondary btn-sm">Copy Query</button>
+                    <a id="btn-download" href="/export-query" class="btn btn-secondary btn-sm" download="generated_query.txt">Download Query (.txt)</a>
+                </div>
+            </div>
+
+            <div class="sql-display-box" id="sql-display">
+                SELECT id, username, role FROM users WHERE username = '' OR '1'='1';
+            </div>
+            <div id="copy-feedback" class="copy-success hidden">Copied to clipboard!</div>
+        </div>
+
+        <!-- Side-by-Side Vulnerable vs Secure Display -->
+        <div class="grid-2 mt-4">
+            <!-- RED / VULNERABLE SECTION -->
+            <div class="card card-vulnerable">
+                <div class="section-badge badge-vulnerable">RED / WARNING SECTION</div>
+                <h3 class="title-vulnerable">Vulnerable SQL (String Concatenation)</h3>
+                <p class="flow-description">
+                    <strong>Pattern:</strong> <code>"SELECT ... WHERE username = '" + user_input + "';"</code><br>
+                    <strong>Compiler Issue:</strong> Untrusted user input introduces new lexical tokens that mutate the Abstract Syntax Tree (AST).
+                </p>
+
+                <div class="result-box mt-3">
+                    <div class="result-header">Database Output:</div>
+                    <div id="vuln-results" class="output-content">Click "Run Vulnerable Query" to execute.</div>
+                </div>
+
+                <div id="vuln-status" class="status-indicator status-warning mt-2">
+                    Awaiting execution...
+                </div>
+            </div>
+
+            <!-- GREEN / SECURE SECTION -->
+            <div class="card card-secure">
+                <div class="section-badge badge-secure">GREEN / SECURE SECTION</div>
+                <h3 class="title-secure">Parameterized SQL (Prepared Statement)</h3>
+                <p class="flow-description">
+                    <strong>Pattern:</strong> <code>cursor.execute("SELECT ... WHERE username = ?", (user_input,))</code><br>
+                    <strong>Compiler Advantage:</strong> Query grammar is compiled beforehand; user input is bound strictly as literal data.
+                </p>
+
+                <div class="result-box mt-3">
+                    <div class="result-header">Database Output:</div>
+                    <div id="secure-results" class="output-content">Click "Run Secure Query" to execute.</div>
+                </div>
+
+                <div id="secure-status" class="status-indicator status-secure mt-2">
+                    Awaiting execution...
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container footer-content">
+            <span>Document Vault - SQL Injection Compiler Lab</span>
+            <span>Local Educational Lab · SQLite · Python Flask</span>
+        </div>
+    </footer>
+
+    <script>
+        const usernameInput = document.getElementById('username-input');
+        const sqlDisplay = document.getElementById('sql-display');
+        const btnDownload = document.getElementById('btn-download');
+        const btnCopy = document.getElementById('btn-copy');
+        const copyFeedback = document.getElementById('copy-feedback');
+
+        const vulnResults = document.getElementById('vuln-results');
+        const secureResults = document.getElementById('secure-results');
+        const vulnStatus = document.getElementById('vuln-status');
+        const secureStatus = document.getElementById('secure-status');
+
+        // Presets click
+        document.querySelectorAll('.btn-preset').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const val = btn.getAttribute('data-val');
+                usernameInput.value = val;
+                executeBoth(val);
+            });
+        });
+
+        document.getElementById('btn-vuln').addEventListener('click', () => {
+            executeVulnerable(usernameInput.value);
+        });
+
+        document.getElementById('btn-secure').addEventListener('click', () => {
+            executeSecure(usernameInput.value);
+        });
+
+        btnCopy.addEventListener('click', () => {
+            const sqlText = sqlDisplay.innerText.trim();
+            navigator.clipboard.writeText(sqlText).then(() => {
+                copyFeedback.classList.remove('hidden');
+                setTimeout(() => copyFeedback.classList.add('hidden'), 2000);
+            });
+        });
+
+        function updateDownloadUrl(sql) {
+            btnDownload.href = `/export-query?sql=${encodeURIComponent(sql)}`;
+        }
+
+        async function executeVulnerable(username) {
+            vulnResults.innerText = "Executing query in vulnerable mode...";
+            try {
+                const res = await fetch('/api/execute-sql', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: username, mode: 'vulnerable' })
+                });
+                const data = await res.json();
+                sqlDisplay.innerText = data.generated_sql;
+                updateDownloadUrl(data.generated_sql);
+
+                if (data.error) {
+                    vulnResults.innerHTML = `<span class="text-danger font-mono">SQL Syntax Error:<br>${data.error}</span>`;
+                    vulnStatus.className = "status-indicator status-danger";
+                    vulnStatus.innerText = "SQL Syntax Error Triggered — Injected characters broke the SQL parser grammar.";
+                } else {
+                    vulnResults.innerText = JSON.stringify(data.results, null, 2);
+                    if (data.is_vulnerable) {
+                        vulnStatus.className = "status-indicator status-danger";
+                        vulnStatus.innerText = "SQL Injection vulnerability demonstrated. Query logic was manipulated!";
+                    } else {
+                        vulnStatus.className = "status-indicator status-info";
+                        vulnStatus.innerText = "Normal query execution.";
+                    }
+                }
+            } catch (err) {
+                vulnResults.innerText = "Error: " + err.message;
+            }
+        }
+
+        async function executeSecure(username) {
+            secureResults.innerText = "Executing parameterized statement...";
+            try {
+                const res = await fetch('/api/execute-sql', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: username, mode: 'secure' })
+                });
+                const data = await res.json();
+                secureResults.innerText = JSON.stringify(data.results, null, 2);
+                secureStatus.className = "status-indicator status-secure";
+                secureStatus.innerText = `Parameterized Query — Secure. Bound parameter: "${username}". Zero syntax alteration.`;
+            } catch (err) {
+                secureResults.innerText = "Error: " + err.message;
+            }
+        }
+
+        async function executeBoth(val) {
+            await executeVulnerable(val);
+            await executeSecure(val);
+        }
+
+        // Run default demo on load
+        window.addEventListener('DOMContentLoaded', () => {
+            executeBoth(usernameInput.value);
+        });
+    </script>
+</body>
+</html>

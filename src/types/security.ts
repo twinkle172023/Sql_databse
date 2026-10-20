@@ -1,3 +1,17 @@
+export interface DocumentRecord {
+  id: string;
+  original_filename: string;
+  stored_filename?: string;
+  detected_mime_type: string;
+  extension_claimed?: string;
+  file_size: number;
+  upload_timestamp: string;
+  storage_path?: string;
+  upload_status?: string;
+  validation_details?: any;
+  [key: string]: any;
+}
+
 export interface ValidationReport {
   isValid: boolean;
   verdict: 'ACCEPTED' | 'REJECTED';
@@ -13,19 +27,6 @@ export interface ValidationReport {
   recommendation: string;
 }
 
-export interface DocumentRecord {
-  id: string;
-  original_filename: string;
-  stored_filename: string;
-  detected_mime_type: string;
-  extension_claimed: string;
-  file_size: number;
-  upload_timestamp: string;
-  storage_path: string;
-  upload_status: 'ACCEPTED' | 'REJECTED';
-  validation_details: ValidationReport;
-}
-
 export interface SqlSearchResult {
   success: boolean;
   mode: 'VULNERABLE' | 'SECURE';
@@ -39,21 +40,8 @@ export interface SqlSearchResult {
   results: Record<string, any>[];
   error?: string;
   injectionDetected?: boolean;
-  analysis: {
-    vulnerability?: string;
-    defense?: string;
-    explanation: string;
-    risk?: string;
-    result?: string;
-  };
-  simulatedCompromise?: {
-    status: string;
-    banner: string;
-    message: string;
-    leakedSyntheticTables: string[];
-    exposedSyntheticCount: number;
-    notExposedNotice: string[];
-  } | null;
+  analysis?: any;
+  simulatedCompromise?: any;
 }
 
 export interface FilePreset {

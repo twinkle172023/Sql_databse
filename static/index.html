@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Document Upload Security Lab</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Document Upload Security Lab</h1>
+      <p class="subtitle">Educational Demonstration of Insecure File Validation and SQL Injection Risks</p>
+    </header>
+
+    <!-- Navigation -->
+    <nav class="nav-bar">
+      <button class="nav-btn active" data-tab="upload-section">Document Upload</button>
+      <button class="nav-btn" data-tab="sql-section">SQL Injection Lab</button>
+      <button class="nav-btn" data-tab="architecture-section">Architecture & Concept</button>
+    </nav>
+
+    <!-- 1. Document Upload Section -->
+    <section id="upload-section" class="tab-content active">
+      <div class="card">
+        <h2>1. Document Upload</h2>
+        <p class="card-desc">Supported: PDF, DOC, DOCX, PPT, PPTX, TXT, JPG, JPEG, PNG (Demonstrates extension-only validation).</p>
+
+        <form id="upload-form" class="upload-box">
+          <input type="file" id="file-input" required />
+          <button type="submit" id="upload-btn">Upload Document</button>
+        </form>
+
+        <div id="upload-result" class="notice-box hidden"></div>
+      </div>
+
+      <!-- Uploaded Files Table -->
+      <div class="card mt-4">
+        <h2>Uploaded Files in Database (documents.db)</h2>
+        <div class="table-container">
+          <table id="documents-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Original Filename</th>
+                <th>Extension</th>
+                <th>Size</th>
+                <th>Uploaded At</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td colspan="6" class="text-center">Loading documents...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. SQL Injection Lab Section -->
+    <section id="sql-section" class="tab-content">
+      <div class="card warning-card">
+        <div class="warning-badge">INTENTIONALLY VULNERABLE — EDUCATIONAL LAB</div>
+        <p class="warning-text">
+          <strong>WARNING:</strong> This demonstration executes raw queries strictly against the isolated <code>sql_lab.db</code> containing only synthetic demonstration data. It is never connected to a production database, real credentials, or operating-system commands.
+        </p>
+      </div>
+
+      <div class="card mt-4">
+        <h2>Search Synthetic Records (demo_documents)</h2>
+        <div class="search-box">
+          <input type="text" id="sql-input" placeholder="Enter filename (e.g., report.pdf or payload)..." value="' OR '1'='1" />
+          <button id="run-vuln-btn" class="btn-danger">Run Vulnerable Query</button>
+          <button id="run-secure-btn" class="btn-success">Run Secure Query</button>
+        </div>
+
+        <div class="preset-links">
+          <span>Test Payloads:</span>
+          <button type="button" class="preset-btn" data-val="' OR '1'='1">' OR '1'='1</button>
+          <button type="button" class="preset-btn" data-val="report.pdf">report.pdf (Normal)</button>
+          <button type="button" class="preset-btn" data-val="' UNION SELECT id, username, role, 'EXPOSED' FROM demo_users --">' UNION SELECT demo_users --</button>
+        </div>
+      </div>
+
+      <!-- SQL Comparison Display -->
+      <div class="grid-2 mt-4">
+        <div class="card result-card">
+          <h3 class="title-vuln">VULNERABLE QUERY</h3>
+          <p class="flow-text">User input → SQL string → unintended query behavior</p>
+          <div class="code-box" id="vuln-sql-code">SELECT * FROM demo_documents WHERE filename = '...';</div>
+          <div class="output-container" id="vuln-output">Click "Run Vulnerable Query" to execute.</div>
+        </div>
+
+        <div class="card result-card">
+          <h3 class="title-sec">SECURE QUERY</h3>
+          <p class="flow-text">User input → parameterized value → treated as data</p>
+          <div class="code-box" id="secure-sql-code">SELECT * FROM demo_documents WHERE filename = ?;</div>
+          <div class="output-container" id="secure-output">Click "Run Secure Query" to execute.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. Architecture & Security Concept -->
+    <section id="architecture-section" class="tab-content">
+      <div class="card">
+        <h2>Database & Pipeline Architecture</h2>
+        <p class="card-desc">The application cleanly separates real upload metadata from synthetic injection tests.</p>
+
+        <div class="grid-2">
+          <div>
+            <h3>File Upload Pipeline (documents.db)</h3>
+            <pre class="ascii-diagram">
+USER
+  |
+  | upload document.pdf
+  v
+UPLOAD SERVER
+  |
+  +----> uploads/ (Stored as random UUID)
+  |
+  +----> documents.db
+             |
+             +-- filename
+             +-- size
+             +-- timestamp
+            </pre>
+          </div>
+
+          <div>
+            <h3>SQL Injection Lab (sql_lab.db)</h3>
+            <pre class="ascii-diagram">
+SQL INJECTION LAB
+
+User Input
+    |
+    v
+Intentionally Vulnerable Query
+    |
+    v
+sql_lab.db (Isolated SQLite file)
+    |
+    v
+Synthetic Records (alice, bob, report.pdf)
+            </pre>
+          </div>
+        </div>
+
+        <div class="explanation-box mt-4">
+          <h3>Why Extension-Only Validation is Insecure</h3>
+          <p>
+            When a server relies solely on <code>filename.endswith('.pdf')</code>, an attacker can rename a Python script (e.g. <code>hello.py</code> to <code>hello.pdf</code>). The server accepts it because it trusts the extension. In a real-world insecure system, if a background worker or server later attempts to execute or evaluate the file, malicious code runs. In this laboratory, uploaded files are stored strictly as inert binary data with UUID filenames and are <strong>NEVER executed</strong>.
+          </p>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

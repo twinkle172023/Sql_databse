@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documents - Document Vault</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <header class="header">
+        <div class="container nav-container">
+            <div class="brand">
+                <span class="brand-badge">SQL</span>
+                <h2>Document Vault - Compiler Lab</h2>
+            </div>
+            <nav class="nav-links">
+                <a href="/" class="nav-link">Home</a>
+                <a href="/upload" class="nav-link">Upload Documents</a>
+                <a href="/documents" class="nav-link active">Documents</a>
+                <a href="/sql-lab" class="nav-link">SQL Injection Lab</a>
+                <a href="/compiler-demo" class="nav-link">Compiler Demo</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container main-content">
+        <div class="card">
+            <div class="card-header-flex">
+                <div>
+                    <h2>Uploaded Documents in database.db</h2>
+                    <p class="card-desc">All document metadata records stored in SQLite.</p>
+                </div>
+                <a href="/upload" class="btn btn-primary btn-sm">+ Upload New Document</a>
+            </div>
+
+            <div class="table-responsive mt-3">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Original Filename</th>
+                            <th>Stored Filename (UUID)</th>
+                            <th>Extension</th>
+                            <th>Size</th>
+                            <th>Upload Date</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if documents %}
+                            {% for doc in documents %}
+                                <tr>
+                                    <td><strong>#{{ doc['id'] }}</strong></td>
+                                    <td>{{ doc['original_filename'] }}</td>
+                                    <td><code class="code-sm">{{ doc['filename'] }}</code></td>
+                                    <td><span class="badge-ext">{{ doc['file_extension'] }}</span></td>
+                                    <td>{{ doc['file_size'] }} bytes</td>
+                                    <td>{{ doc['upload_date'] }}</td>
+                                    <td>
+                                        <a href="/download/{{ doc['id'] }}" class="btn-action">Download</a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="7" class="text-center text-muted">No documents found. Run <code>python seed.py</code> or upload a file.</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container footer-content">
+            <span>Document Vault - SQL Injection Compiler Lab</span>
+            <span>Local Educational Lab · SQLite</span>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Compiler Demonstration - SQL Injection Analysis</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <header class="header">
+        <div class="container nav-container">
+            <div class="brand">
+                <span class="brand-badge">SQL</span>
+                <h2>Document Vault - Compiler Lab</h2>
+            </div>
+            <nav class="nav-links">
+                <a href="/" class="nav-link">Home</a>
+                <a href="/upload" class="nav-link">Upload Documents</a>
+                <a href="/documents" class="nav-link">Documents</a>
+                <a href="/sql-lab" class="nav-link">SQL Injection Lab</a>
+                <a href="/compiler-demo" class="nav-link active">Compiler Demo</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container main-content">
+        <div class="card">
+            <h2>Compiler Design Project Integration Guide</h2>
+            <p class="card-desc">
+                How our SQL Injection Detection Compiler analyzes query structures, token streams, and AST nodes.
+            </p>
+        </div>
+
+        <!-- 1. What SQL Injection Is -->
+        <div class="card mt-3">
+            <h3>1. What is SQL Injection?</h3>
+            <p class="card-text">
+                SQL Injection (SQLi) occurs when an application takes untrusted user data and concatenates or interpolates it directly into an SQL command string before sending it to the database engine.
+            </p>
+            <p class="card-text">
+                From a <strong>Compiler Design perspective</strong>, user input is supposed to be a <em>literal value (operand)</em>. However, when user data contains special characters like <code>'</code>, <code>OR</code>, <code>UNION</code>, or <code>--</code>, the SQL lexical analyzer generates new syntax tokens (operators and keywords), resulting in a fundamentally mutated Abstract Syntax Tree (AST).
+            </p>
+        </div>
+
+        <!-- 2. Vulnerable vs Secure Comparison -->
+        <div class="grid-2 mt-4">
+            <div class="card card-vulnerable">
+                <h3 class="title-vulnerable">Vulnerable Query Construction</h3>
+                <div class="code-box">SELECT * FROM users WHERE username = 'USER_INPUT';</div>
+                <div class="mt-2 text-sm">
+                    <strong>Problem:</strong> User input becomes part of the SQL syntax.
+                </div>
+                <p class="card-text mt-2">
+                    When the input is <code>' OR '1'='1</code>, the tokenizer produces:
+                    <br>
+                    <code>[LITERAL ''], [KEYWORD OR], [LITERAL '1'], [OPERATOR =], [LITERAL '1']</code>
+                    <br>
+                    The logical tree changes from an exact equality check to an always-true boolean tautology.
+                </p>
+            </div>
+
+            <div class="card card-secure">
+                <h3 class="title-secure">Secure Parameterized Construction</h3>
+                <div class="code-box">SELECT * FROM users WHERE username = ?;</div>
+                <div class="mt-2 text-sm">
+                    <strong>Solution:</strong> User input is treated strictly as data rather than SQL syntax.
+                </div>
+                <p class="card-text mt-2">
+                    The SQL statement is pre-compiled into a fixed AST with a placeholder <code>?</code> before receiving user input. 
+                    The value <code>' OR '1'='1</code> is bound directly into memory as a literal string. Quotes have zero syntactic power.
+                </p>
+            </div>
+        </div>
+
+        <!-- 3. What the Compiler Detects -->
+        <div class="card mt-4">
+            <h3>3. What Your SQL Injection Detection Compiler Should Detect</h3>
+            <ul class="feature-list mt-2">
+                <li>
+                    <strong>Tainted String Concatenation:</strong> Detect when SQL statements are formed by combining string constants with external variables (e.g. <code>query = "..." + var</code> or f-strings <code>f"...{var}..."</code>) instead of parameterized bindings.
+                </li>
+                <li>
+                    <strong>AST Node Mutation:</strong> Identify that user input expands the grammar tree into binary expressions (e.g., <code>BinaryOp: OR</code>) or multi-query statements rather than remaining a single literal node.
+                </li>
+                <li>
+                    <strong>Lexical Token Boundary Violation:</strong> Flag queries where unescaped string delimiter tokens (<code>'</code> or <code>"</code>) appear within dynamic expressions.
+                </li>
+                <li>
+                    <strong>Rule Recommendation:</strong> Suggest converting concatenated SQL into prepared statement syntax using <code>?</code> (SQLite/MySQL) or <code>$1</code> (PostgreSQL).
+                </li>
+            </ul>
+        </div>
+
+        <!-- 4. Practical Demonstration Flow for Viva / Presentation -->
+        <div class="card mt-4">
+            <h3>4. Viva / Project Presentation Workflow</h3>
+            <ol class="step-list mt-2">
+                <li>
+                    <strong>Step 1:</strong> Navigate to the <a href="/sql-lab">SQL Injection Lab</a> page.
+                </li>
+                <li>
+                    <strong>Step 2:</strong> Enter payload <code>' OR '1'='1</code> and click <strong>Run Vulnerable Query</strong>.
+                </li>
+                <li>
+                    <strong>Step 3:</strong> Click <strong>Copy Query</strong> or <strong>Download Query (.txt)</strong>.
+                </li>
+                <li>
+                    <strong>Step 4:</strong> Pass the exported query string into your SQL-injection detection compiler.
+                </li>
+                <li>
+                    <strong>Step 5:</strong> Show your compiler's output (e.g. AST breakdown, tainted token alert, or rule violation).
+                </li>
+                <li>
+                    <strong>Step 6:</strong> Return to the lab, click <strong>Run Secure Query</strong>, and demonstrate that parameterized queries prevent the injection completely.
+                </li>
+            </ol>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container footer-content">
+            <span>Document Vault - SQL Injection Compiler Lab</span>
+            <span>Compiler Design Educational Reference</span>
+        </div>
+    </footer>
+</body>
+</html>

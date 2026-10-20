@@ -1,8 +1,21 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.env
+
+# SQLite databases (generated at startup)
+*.db
+*.sqlite
+documents.db
+sql_lab.db
+
+# Uploaded files
+uploads/*
+!uploads/.gitkeep
+
+# Node.js
 node_modules/
-build/
 dist/
-coverage/
 .DS_Store
-*.log
-.env*
-!.env.example

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document Vault - SQL Injection Compiler Lab</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <header class="header">
+        <div class="container nav-container">
+            <div class="brand">
+                <span class="brand-badge">SQL</span>
+                <h2>Document Vault - Compiler Lab</h2>
+            </div>
+            <nav class="nav-links">
+                <a href="/" class="nav-link active">Home</a>
+                <a href="/upload" class="nav-link">Upload Documents</a>
+                <a href="/documents" class="nav-link">Documents</a>
+                <a href="/sql-lab" class="nav-link">SQL Injection Lab</a>
+                <a href="/compiler-demo" class="nav-link">Compiler Demo</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container main-content">
+        <div class="hero-card">
+            <h1>Compiler Design Educational Lab</h1>
+            <p class="hero-subtitle">
+                A local demonstration environment providing controlled SQL injection patterns for compiler detection and AST analysis.
+            </p>
+            <div class="button-group">
+                <a href="/sql-lab" class="btn btn-primary">Open SQL Injection Lab</a>
+                <a href="/upload" class="btn btn-secondary">Upload Sample Documents</a>
+            </div>
+        </div>
+
+        <div class="grid-2 mt-4">
+            <div class="card">
+                <h3>1. File Upload Subsystem</h3>
+                <p class="card-text">
+                    Demonstrates document storage using SQLite metadata. Files are stored as inert data with generated UUIDs and are <strong>never executed</strong>.
+                </p>
+                <ul class="feature-list">
+                    <li>Supported: PDF, DOC, DOCX, PPT, PPTX, TXT, JPG, PNG</li>
+                    <li>Files stored as inert data in <code>uploads/</code></li>
+                    <li>Metadata logged into <code>documents</code> table in <code>database.db</code></li>
+                </ul>
+                <div class="mt-3">
+                    <a href="/upload" class="link-btn">Go to Upload Page &rarr;</a>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>2. SQL Injection Demonstration</h3>
+                <p class="card-text">
+                    Generates raw vulnerable SQL queries via string interpolation alongside safe parameterized equivalents.
+                </p>
+                <ul class="feature-list">
+                    <li>Vulnerable Mode: <code>SELECT ... WHERE username = '{input}'</code></li>
+                    <li>Secure Mode: <code>SELECT ... WHERE username = ?</code></li>
+                    <li>Export button to pass query into your Compiler project</li>
+                </ul>
+                <div class="mt-3">
+                    <a href="/sql-lab" class="link-btn">Go to SQL Lab &rarr;</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mt-4">
+            <h3>Architecture Pipeline</h3>
+            <pre class="ascii-box">
+User Upload  ──&gt;  Save to uploads/ (UUID)  ──&gt;  Store in documents table  ──&gt;  Display in Documents Table
+
+User Input   ──&gt;  SQL Interpolation (Vulnerable)  ──&gt;  Altered Query AST  ──&gt;  Compiler Detects Vulnerable SQL
+             ──&gt;  Parameterized Query (Secure)    ──&gt;  Literal Data AST   ──&gt;  Compiler Verifies Safe Pattern
+            </pre>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container footer-content">
+            <span>Document Vault - SQL Injection Compiler Lab</span>
+            <span>Local Educational Lab · SQLite · Python Flask</span>
+        </div>
+    </footer>
+</body>
+</html>

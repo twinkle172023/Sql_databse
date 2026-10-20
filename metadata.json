@@ -1,6 +1,6 @@
 {
-  "name": "DocumentVault Security Lab",
-  "description": "Educational cybersecurity platform demonstrating insecure file-upload handling and SQL injection risks in a controlled, isolated laboratory.",
+  "name": "Document Upload Security Lab",
+  "description": "Educational cybersecurity demonstration of insecure file validation and SQL injection.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }
